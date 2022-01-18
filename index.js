@@ -44,10 +44,10 @@ async function main() {
     });
 
     // [GET] "/herois/:id" - Read Single (by Id) (Ler um registro pelo ID)
-    app.get("/herois/:id", function (req, res) {
-        const id = req.params.id - 1;
+    app.get("/herois/:id", async function (req, res) {
+        const id = req.params.id;
 
-        const item = lista[id];
+        const item = await collection.findOne({ _id: new ObjectId(id) });
 
         res.send(item);
     });
