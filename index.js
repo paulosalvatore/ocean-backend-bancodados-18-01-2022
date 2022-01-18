@@ -62,21 +62,26 @@ async function main() {
     });
 
     // [PUT] "/herois/:id" - Update (Atualizar um registro)
-    app.put("/herois/:id", function (req, res) {
-        const id = req.params.id - 1;
+    app.put("/herois/:id", async function (req, res) {
+        const id = req.params.id;
 
         const item = req.body;
 
-        lista[id] = item.nome;
+        await collection.updateOne(
+            { _id: new ObjectId(id) },
+            {
+                $set: item,
+            }
+        );
 
-        res.send("Item atualizado com sucesso.");
+        res.send(item);
     });
 
     // [DELETE] "/herois/:id" - Delete (Remover um registro)
-    app.delete("/herois/:id", function (req, res) {
-        const id = req.params.id - 1;
+    app.delete("/herois/:id", async function (req, res) {
+        const id = req.params.id;
 
-        delete lista[id];
+        await collection.deleteOne({ _id: new ObjectId(id) });
 
         res.send("Item removido com sucesso.");
     });
