@@ -1,64 +1,78 @@
 const express = require("express");
-const app = express();
 
-// Sinalizo para o Express que o body das requisições
-// estará sempre estruturado em JSON
-app.use(express.json());
+const { MongoClient, ObjectId } = require("mongodb");
+const url = "mongodb://localhost:27017";
+const dbName = "ocean_bancodados_18_01_2022";
 
-// Endpoint "/"
-app.get("/", function (req, res) {
-    res.send("Hello, World!");
-});
+async function main() {
+  // Conecta com o banco de dados
+  const client = await MongoClient.connect(url);
+  const db = client.db(dbName);
+  const collection = db.collection("herois");
 
-// Endpoint "/oi"
-app.get("/oi", function (req, res) {
+  // Aplicação express
+  const app = express();
+
+  // JSON
+  app.use(express.json());
+
+  // CSS
+  app.use(express.static("public"));
+
+  // Endpoint "/"
+  app.get("/", (req, res) => {
+    res.send(
+      '<link rel="stylesheet" type="text/css" href="/style.css"><main><h1>Hell World</h1></main>'
+    );
+  });
+
+  // Endpoint "/oi"
+  app.get("/oi", (req, res) => {
     res.send("Olá, mundo!");
-});
+  });
 
-const lista = ["Mulher Maravilha", "Capitã Marvel", "Homem de Ferro"];
-//              0                   1                2
+  // [GET] "/herois" - Lista todos os herois
+  app.get("/herois", async (req, res) => {
+    const documentos = await collection.find().toArray();
+    res.send(documentos);
+  });
 
-// [GET] "/herois" - Read All (Ler todos os registros)
-app.get("/herois", function (req, res) {
-    res.send(lista.filter(Boolean));
-});
-
-// [GET] "/herois/:id" - Read Single (by Id) (Ler um registro pelo ID)
-app.get("/herois/:id", function (req, res) {
-    const id = req.params.id - 1;
-
-    const item = lista[id];
-
+  // [GET] "/herois/:id" - Lista um heroi
+  app.get("/herois/:id", async (req, res) => {
+    const id = req.params.id;
+    const item = await collection.findOne({ _id: new ObjectId(id) });
     res.send(item);
-});
+  });
 
-// [POST] "/herois" - Create (Criar um registro)
-app.post("/herois", function (req, res) {
+  // [POST] "/herois" - Insere um heroi
+  app.post("/herois", async (req, res) => {
     const item = req.body;
+    await collection.insertOne(item);
+    res.send(item);
+  });
 
-    lista.push(item.nome);
-
-    res.send("Item adicionado com sucesso.");
-});
-
-// [PUT] "/herois/:id" - Update (Atualizar um registro)
-app.put("/herois/:id", function (req, res) {
-    const id = req.params.id - 1;
-
+  // [PUT] "/herois/:id" - Altera um heroi
+  app.put("/herois/:id", async (req, res) => {
+    const id = req.params.id;
     const item = req.body;
+    await collection.updateOne({ _id: new ObjectId(id) }, { $set: item });
+    res.send(item);
+  });
 
-    lista[id] = item.nome;
+  // [DELETE] "/herois/:id" - Deleta um heroi
+  app.delete("/herois/:id", async (req, res) => {
+    const id = req.params.id;
+    await collection.deleteOne({ _id: new ObjectId(id) });
+    res.send(`Heroi ${id} deletado!`);
+  });
 
-    res.send("Item atualizado com sucesso.");
-});
+  // [LISTEN]
+  app.listen(3000, () => {
+    console.log("Servidor iniciado na porta 3000.");
+    console.log("Acesse: http://localhost:3000");
+    console.log("Acesse: http://localhost:3000/oi");
+    console.log("Acesse: http://localhost:3000/herois");
+  });
+}
 
-// [DELETE] "/herois/:id" - Delete (Remover um registro)
-app.delete("/herois/:id", function (req, res) {
-    const id = req.params.id - 1;
-
-    delete lista[id];
-
-    res.send("Item removido com sucesso.");
-});
-
-app.listen(3000);
+main();
