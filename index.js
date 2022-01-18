@@ -37,8 +37,10 @@ async function main() {
     //              0                   1                2
 
     // [GET] "/herois" - Read All (Ler todos os registros)
-    app.get("/herois", function (req, res) {
-        res.send(lista.filter(Boolean));
+    app.get("/herois", async function (req, res) {
+        const documentos = await collection.find().toArray();
+
+        res.send(documentos);
     });
 
     // [GET] "/herois/:id" - Read Single (by Id) (Ler um registro pelo ID)
