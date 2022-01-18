@@ -1,64 +1,73 @@
 const express = require("express");
-const app = express();
+const { MongoClient, ObjectId } = require("mongodb");
 
-// Sinalizo para o Express que o body das requisições
-// estará sempre estruturado em JSON
-app.use(express.json());
+const url = "mongodb://localhost:27017";
+const dbName = "ocean_bancodados_18_01_2022";
 
-// Endpoint "/"
-app.get("/", function (req, res) {
-    res.send("Hello, World!");
-});
+async function main() {
+    const app = express();
 
-// Endpoint "/oi"
-app.get("/oi", function (req, res) {
-    res.send("Olá, mundo!");
-});
+    // Sinalizo para o Express que o body das requisições
+    // estará sempre estruturado em JSON
+    app.use(express.json());
 
-const lista = ["Mulher Maravilha", "Capitã Marvel", "Homem de Ferro"];
-//              0                   1                2
+    // Endpoint "/"
+    app.get("/", function (req, res) {
+        res.send("Hello, World!");
+    });
 
-// [GET] "/herois" - Read All (Ler todos os registros)
-app.get("/herois", function (req, res) {
-    res.send(lista.filter(Boolean));
-});
+    // Endpoint "/oi"
+    app.get("/oi", function (req, res) {
+        res.send("Olá, mundo!");
+    });
 
-// [GET] "/herois/:id" - Read Single (by Id) (Ler um registro pelo ID)
-app.get("/herois/:id", function (req, res) {
-    const id = req.params.id - 1;
+    const lista = ["Mulher Maravilha", "Capitã Marvel", "Homem de Ferro"];
+    //              0                   1                2
 
-    const item = lista[id];
+    // [GET] "/herois" - Read All (Ler todos os registros)
+    app.get("/herois", function (req, res) {
+        res.send(lista.filter(Boolean));
+    });
 
-    res.send(item);
-});
+    // [GET] "/herois/:id" - Read Single (by Id) (Ler um registro pelo ID)
+    app.get("/herois/:id", function (req, res) {
+        const id = req.params.id - 1;
 
-// [POST] "/herois" - Create (Criar um registro)
-app.post("/herois", function (req, res) {
-    const item = req.body;
+        const item = lista[id];
 
-    lista.push(item.nome);
+        res.send(item);
+    });
 
-    res.send("Item adicionado com sucesso.");
-});
+    // [POST] "/herois" - Create (Criar um registro)
+    app.post("/herois", function (req, res) {
+        const item = req.body;
 
-// [PUT] "/herois/:id" - Update (Atualizar um registro)
-app.put("/herois/:id", function (req, res) {
-    const id = req.params.id - 1;
+        lista.push(item.nome);
 
-    const item = req.body;
+        res.send("Item adicionado com sucesso.");
+    });
 
-    lista[id] = item.nome;
+    // [PUT] "/herois/:id" - Update (Atualizar um registro)
+    app.put("/herois/:id", function (req, res) {
+        const id = req.params.id - 1;
 
-    res.send("Item atualizado com sucesso.");
-});
+        const item = req.body;
 
-// [DELETE] "/herois/:id" - Delete (Remover um registro)
-app.delete("/herois/:id", function (req, res) {
-    const id = req.params.id - 1;
+        lista[id] = item.nome;
 
-    delete lista[id];
+        res.send("Item atualizado com sucesso.");
+    });
 
-    res.send("Item removido com sucesso.");
-});
+    // [DELETE] "/herois/:id" - Delete (Remover um registro)
+    app.delete("/herois/:id", function (req, res) {
+        const id = req.params.id - 1;
 
-app.listen(3000);
+        delete lista[id];
+
+        res.send("Item removido com sucesso.");
+    });
+
+    app.listen(3000);
+}
+
+main();
